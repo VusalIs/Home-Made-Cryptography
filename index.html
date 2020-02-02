@@ -1,0 +1,233 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Home Brew Cryptography
+        </title>
+        <style>
+            body {
+                padding: 0px;
+                margin: 0px;
+            }
+
+            .square {
+                width: 50%;
+                height: 50%;
+                border: 2px black solid;
+                box-sizing: border-box;
+                float: left;
+            }
+
+            input {
+                padding: 5px;
+            }
+
+            .md-12 {
+                width: 100%;
+            }
+            .md-6 {
+                width: 50%;
+            }
+            .md-3 {
+                width: 25%;
+            }
+            .default-padding,
+            .md-12,
+            .md-6,
+            .md-3 {
+                display: inline;
+                padding: 5;
+            }
+            .text-align-center {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="square">
+            <div class="md-12">
+                <h1 class="text-align-center">Key Generator</h3>
+            </div>
+
+            <div class="md-12">
+                <div class="md-3">
+                    <input type="text" id="private_key_generator" placeholder="Please enter private key." />
+                </div>
+                <button type="button" onclick="createPrivateKeyAndTable(document.getElementById('private_key_generator').value)" id="private_key_generator_form">Submit</button>
+            </div>
+        </div>
+        <div class="square">
+            <div class="md-12">
+                <h1 class="text-align-center">Encryption</h3>
+            </div>
+
+            <div class="md-12">
+                <div class="md-3">
+                    <input type="text" id="private_key" placeholder="Please enter private key." />
+                </div>
+                <div class="md-3">
+                    <input type="text" id="plain_text" placeholder="Please enter plain text." />
+                </div>
+                <div class="md-3">
+                        <label for="private_table">Choose a private table:</label>
+
+                        <input type="file"
+                                id="private_table_encrypt" name="private_table"
+                                accept="text/plain">
+                </div>
+                <button type="button" onclick="encryptPlainText(document.getElementById('private_key').value, document.getElementById('plain_text').value, document.getElementById('private_table_encrypt').files[0])" id="private_key_generator_form">Submit</button>
+            </div>
+            <div class="md-12">
+                <p id="encryptedText"></p>
+            </div>
+        </div>
+        <div class="square">
+                <div class="md-12">
+                    <h1 class="text-align-center">Decryption</h3>
+                </div>
+    
+                <div class="md-12">
+                    <div class="md-3">
+                        <input type="text" id="private_key_decrypytion" placeholder="Please enter private key." />
+                    </div>
+                    <div class="md-3">
+                        <input type="text" id="decrypted_text" placeholder="Please enter decrypted text." />
+                    </div>
+                    <div class="md-3">
+                            <label for="private_table">Choose a private table:</label>
+    
+                            <input type="file"
+                                    id="private_table_decryption" name="private_table"
+                                    accept="text/plain">
+                    </div>
+                    <button type="button" onclick="decryptText(document.getElementById('private_key_decrypytion').value, document.getElementById('decrypted_text').value, document.getElementById('private_table_decryption').files[0])" id="private_key_generator_form">Submit</button>
+                </div>
+                <div class="md-12">
+                    <p id="decryptedText"></p>
+                </div>
+            </div>
+        <script>
+
+var allEmojis = [
+    '😀',
+    '😁',
+    '😂',
+    '😃',
+    '😄',
+    '😅',
+    '😆',
+    '😇',
+    '😈',
+    '😉',
+    '😊',
+    '😋',
+    '😌',
+    '😍',
+    '😎',
+    '😏',
+    '😐',
+    '😑',
+    '😒',
+    '😓',
+    '😗',
+    '😛',
+    '😜',
+    '😝',
+    '😞',
+    '😠'
+];
+// creation
+function createPrivateKeyAndTable(privateKey) {
+    var privateTable = createPrivateTable(privateKey);
+    var batchSize = privateTable.length;
+    downlodPrivateTable("private_table.txt", JSON.stringify(privateTable));
+}
+
+// encryption
+async function encryptPlainText(privateKey, plainText, privateTableFile) {
+    var privateTable = JSON.parse(await readFile(privateTableFile));
+    var encryptedValue = '';
+    var batchSize = privateTable.length
+    for (var i = 0; i < plainText.length; i++) {
+        var positionOfBatch = i % batchSize;
+        var positionOfEmoji = (privateKey.charCodeAt(i % privateKey.length) + plainText.charCodeAt(i) - 194) % 26;
+        encryptedValue += privateTable[positionOfBatch][positionOfEmoji];
+    }
+    console.log(encryptedValue)
+    document.getElementById("encryptedText").innerHTML = encryptedValue;
+}
+
+// decrypytion
+async function decryptText(privateKey, encryptedText, privateTableFile) {
+    console.log(privateKey)
+    console.log(encryptedText)
+    var privateTable = JSON.parse(await readFile(privateTableFile));
+    var batchSize = privateTable.length;
+    var decryptedText = '';
+    for(var i = 0; i < encryptedText.length; i++) {
+        var positionOfBatch = i % batchSize;
+        var positionOfEmoji = privateTable[positionOfBatch].findIndex((element) => {
+        
+console.log(element.charCodeAt(0))
+console.log(encryptedText[i])
+console.log(encryptedText[i].charCodeAt(0))
+            return element.charCodeAt(0) == encryptedText[i].charCodeAt(0);
+        })
+        console.log(positionOfEmoji)
+        var asciiPosition = ((positionOfEmoji+26) - (privateKey.charCodeAt(i % privateKey.length) - 97)) % 26;
+        decryptedText += String.fromCharCode(asciiPosition + 97);
+    }
+    console.log(decryptedText)
+    document.getElementById("decryptedText").innerHTML = decryptedText;
+}
+
+async function readFile(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        var result;
+        reader.readAsText(file)
+        reader.onload = function (){
+            resolve(reader.result)
+        }
+    })
+    
+}
+
+function createPrivateTable(private_key) {
+    var privateTable = [];
+    var batchSize = Math.round(Math.random() * private_key.length);
+    for (var i = 0; i < batchSize; i++) {
+        privateTable.push([...allEmojisShuffle()]);
+    }
+    
+    return privateTable;
+}
+
+function downlodPrivateTable(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+function allEmojisShuffle() {
+    for (var i = 1; i < allEmojis.length; i++) {
+        for (var j = 0; j < i; j++) {
+            var newPosition = Math.floor(Math.random() * j);
+            var tempVal = allEmojis[j];
+            allEmojis[j] = allEmojis[newPosition];
+            allEmojis[newPosition] = tempVal;
+        }
+    }
+    return allEmojis;
+}
+
+        </script>
+    </body>
+</html>
