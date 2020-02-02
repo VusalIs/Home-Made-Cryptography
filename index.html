@@ -159,20 +159,15 @@ async function encryptPlainText(privateKey, plainText, privateTableFile) {
 
 // decrypytion
 async function decryptText(privateKey, encryptedText, privateTableFile) {
-    console.log(privateKey)
-    console.log(encryptedText)
+    encryptedText = [...encryptedText]
     var privateTable = JSON.parse(await readFile(privateTableFile));
     var batchSize = privateTable.length;
     var decryptedText = '';
     for(var i = 0; i < encryptedText.length; i++) {
+        console.log(encryptedText[i])
+        console.log(encryptedText[i].codePointAt(0))
         var positionOfBatch = i % batchSize;
-        var positionOfEmoji = privateTable[positionOfBatch].findIndex((element) => {
-        
-console.log(element.charCodeAt(0))
-console.log(encryptedText[i])
-console.log(encryptedText[i].charCodeAt(0))
-            return element.charCodeAt(0) == encryptedText[i].charCodeAt(0);
-        })
+        var positionOfEmoji = privateTable[positionOfBatch].findIndex((element) => element.codePointAt(0) == encryptedText[i].codePointAt(0))
         console.log(positionOfEmoji)
         var asciiPosition = ((positionOfEmoji+26) - (privateKey.charCodeAt(i % privateKey.length) - 97)) % 26;
         decryptedText += String.fromCharCode(asciiPosition + 97);
