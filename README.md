@@ -3,11 +3,19 @@
 I have created this encryption method for fun.
 Github Link:
 https://github.com/VusalIs/home_brew_cryptography
-Brief Description:
+
+
+
+# Brief Description
+
 This cryptography is the improved version of the cryptography which we have learnt during
 the class. When this algorithm encrypt and decrypt the plain text to emojis which have been
 defined by the programmer. For that, 2 things are required private key and private table.
-Explanation of algorithm:
+
+
+# Explanation of algorithm
+
+
 User who wants to encrypt and decrypt a plain text has to generate a private table. This
 private table will contain arrays of random value which will be between 1 and a length of
 private key and all arrays in the private table is shuffled before pushing to the private table. I
